@@ -1,0 +1,63 @@
+# Supabase signup incident triage: a human, two Claude Code agents, one room.
+# Specialised from sandbox-quantum/switch/examples/agent-templates/triage-pair.template.yaml
+version: 1
+
+params:
+  team:
+    type: string
+    description: Prefix for the agents and Mattermost channel
+    pattern: "[a-z][a-z0-9-]*"
+    default: supabase
+  provider:
+    type: provider
+    description: Coding agent used by the triager and fixer
+    default: [claude]
+  location:
+    type: location
+    description: Machine running both agents
+    default: local
+    input: advanced
+  directory:
+    type: directory
+    description: Separate working directory for each agent
+    default: "{$agents_dir}/{agent}"
+    input: advanced
+  bridge:
+    type: bridge
+    description: Mattermost connection
+    default: [$first]
+
+agents:
+  - name: "{team}-triager"
+    description: Classifies signup incidents and gathers Supabase evidence
+    addressing: anyone
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{directory}"
+    instructions: |
+      Read agents/triager.instructions.md before handling a report. Work only
+      from evidence available in the shared room or through the granted
+      Supabase connection. Do not include credentials or personal user data in
+      the room. A missing log event is not proof that no error occurred.
+  - name: "{team}-fixer"
+    description: Proposes and applies owner-approved Supabase database fixes
+    addressing: owner-agents
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{directory}"
+    instructions: |
+      Read agents/fixer.instructions.md before handling a handoff. Never write
+      until @owner has approved the exact SQL in this room. Treat an approval
+      as applying only to that exact statement and target.
+
+room:
+  name: "{team}-bug-triage"
+  description: Human-in-the-loop Supabase signup incident triage
+  bridge: "{bridge}"
+  agents: ["{team}-triager", "{team}-fixer"]
+  users: ["{$creator}"]
+
+kickoff: |
+  @{team}-triager and @{team}-fixer: this is the Supabase bug-triage room.
+  Triager, explain how you will classify a signup report and share evidence.
+  Fixer, confirm that you will wait for @owner's approval before any write.
