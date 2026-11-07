@@ -23,7 +23,7 @@ mcp:
       url: "https://mcp.supabase.com/mcp?features=account,database,debugging"
 ```
 
-This selects the account, database, and debugging tool groups needed for the demo, without enabling unrelated storage, branching, or feedback groups. Project scope and read-only behavior are explicit choices in the connection. The room instructions require the triager to inspect only and require the fixer to wait for approval before any write.
+This selects the account, database, and debugging tool groups needed for the demo, without enabling unrelated storage, branching, or feedback groups. The OAuth read/write level is a consent choice, and Supabase's tool confirmations remain enabled. This catalog entry keeps account tools available so the user can list organizations and projects; it does not set `project_ref`, so its OAuth grant is not limited to one project. The demo therefore uses a throwaway Supabase organization/account with no production projects. The room instructions require the triager to inspect only and require the fixer to wait for approval before any write.
 
 The details matter. Supabase's `query_logs` runs against the unified ClickHouse `logs` table, not the Postgres database. Auth events live under `auth_logs`; database errors live under `postgres_logs`. The triager supplies an explicit bounded UTC window, since “search the logs” is otherwise ambiguous and can scan too much. The MCP server also exposes account, database, and debugging groups, so the room instructions tell agents which calls are read-only and require the fixer to wait before any write.
 

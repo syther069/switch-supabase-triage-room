@@ -18,7 +18,7 @@
 
 ## Recording checklist
 
-- Use a fresh Mattermost channel and a throwaway Supabase project only.
+- Use a fresh Mattermost channel and a throwaway Supabase organization/account with no production projects.
 - Run `scripts/seed-supabase.sql` in the Supabase SQL Editor before recording. Enable email signups, then test a new signup without `display_name` metadata.
 - Make sure logs are available for the selected time range. Set the sample report's start time to match the recording, and say UTC explicitly.
 - Keep tool confirmation prompts enabled. Show the owner approving the exact SQL in chat and any separate MCP confirmation.

@@ -23,13 +23,13 @@ The workflow uses **rooms** to put the owner, triager, and fixer in one Mattermo
 ## Reproduce in about 10 minutes
 
 1. Install [Switch Console](https://github.com/sandbox-quantum/switch/releases/latest) and connect a Mattermost workspace.
-2. Connect Supabase through [connector PR #1706](https://github.com/sandbox-quantum/switch/pull/1706). Choose a throwaway project for the demo. The connector uses Supabase's hosted MCP server and OAuth; no service-role key is needed.
+2. Connect Supabase through [connector PR #1706](https://github.com/sandbox-quantum/switch/pull/1706). Use a throwaway Supabase organization/account with no production projects. The connector uses Supabase's hosted MCP server and OAuth; no service-role key is needed.
 3. Load [`rooms/supabase-triage.template.yaml`](rooms/supabase-triage.template.yaml) in Switch Console. Set the provider to Claude Code and the bridge to Mattermost.
 4. In the throwaway project's Supabase SQL Editor, run [`scripts/seed-supabase.sql`](scripts/seed-supabase.sql). This creates the profile table and an `auth.users` trigger that fails when optional `display_name` metadata is missing. Use a throwaway project only.
 5. Submit a test signup without `display_name`, then paste [`demo/seed-bug.md`](demo/seed-bug.md) into `#bug-triage` as `@owner`.
 6. Let the triager check Auth and Postgres logs plus advisor warnings. It should point to the trigger and propose a repair. Review the SQL, reply with an explicit approval, and let the fixer run it. Retry signup and confirm it succeeds.
 
-Use a project-scoped connection and keep tool approval enabled. Log queries need an explicit UTC start and end time. The triager uses `query_logs` for ClickHouse logs (including `auth_logs`, `postgres_logs`, and `edge_logs`) and `execute_sql` only for Postgres inspection. The fixer must not run `execute_sql`, `apply_migration`, or another write tool until `@owner` has approved the exact SQL in the room. A room instruction is a human workflow control; follow the Supabase tool's own confirmation prompt too. The Supabase MCP tool list is not separated into read and write by Switch, so do not grant this connection to agents outside this room.
+Keep Supabase's tool confirmation prompts enabled. This catalog entry does not set `project_ref`, because Supabase disables account tools when that parameter is present; the OAuth grant can therefore reach the organizations and projects available to the connected account. Use a throwaway organization/account with no production projects, and grant the connection only to the two agents in this room. Log queries need an explicit UTC start and end time. The triager uses `query_logs` for ClickHouse logs (including `auth_logs`, `postgres_logs`, and `edge_logs`) and `execute_sql` only for Postgres inspection. The fixer must not run `execute_sql`, `apply_migration`, or another write tool until `@owner` has approved the exact SQL in the room. A room instruction is a human workflow control; follow the Supabase tool's own confirmation prompt too. The Supabase MCP tool list is not separated into read and write by Switch, so do not grant this connection to agents outside this room.
 
 ## Demo video
 
@@ -53,4 +53,4 @@ Demo video: _Add the recording URL here after recording._
 
 ## Safety and cleanup
 
-The SQL fixture targets `auth.users` and intentionally breaks signup until repaired. Run it only in a disposable Supabase project. The repair in the fixer instructions makes profile display names optional and is designed to be repeatable. After recording, remove the demo trigger and table with the cleanup SQL at the end of the seed file or delete the throwaway project from the Supabase Dashboard.
+The SQL fixture targets `auth.users` and intentionally breaks signup until repaired. Run it only in a disposable Supabase organization/account with no production projects. The repair in the fixer instructions makes profile display names optional and is designed to be repeatable. After recording, remove the demo trigger and table with the cleanup SQL at the end of the seed file or delete the throwaway project from the Supabase Dashboard.
